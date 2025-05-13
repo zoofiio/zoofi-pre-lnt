@@ -5,8 +5,9 @@ import {Test, console} from "forge-std/Test.sol";
 import {LntPreDeposit} from "../src/LntPreDeposit.sol";
 import {MockERC721} from "../src/MockERC721.sol";
 import {Arrays} from "openzeppelin-contracts/contracts/utils/Arrays.sol";
+import {ERC721Holder} from "openzeppelin-contracts/contracts/token/ERC721/utils/ERC721Holder.sol";
 
-contract LntPreDepositTest is Test {
+contract LntPreDepositTest is Test, ERC721Holder {
     LntPreDeposit public lnt;
     MockERC721 public nft;
 

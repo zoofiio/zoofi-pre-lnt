@@ -10,6 +10,7 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 contract LntPreDeposit is Ownable, Multicall, IERC721Receiver, ReentrancyGuard {
     using EnumerableSet for EnumerableSet.UintSet;
+
     IERC721 public nft;
     uint256 public totalDeposit;
     mapping(address => EnumerableSet.UintSet) stakedNFTs;
@@ -24,9 +25,7 @@ contract LntPreDeposit is Ownable, Multicall, IERC721Receiver, ReentrancyGuard {
     function deposit(uint256 nftId) external nonReentrant {
         require(nft.ownerOf(nftId) == _msgSender(), "Owner error");
         require(
-            nft.isApprovedForAll(_msgSender(), address(this)) ||
-                nft.getApproved(nftId) == address(this),
-            "Not approved"
+            nft.isApprovedForAll(_msgSender(), address(this)) || nft.getApproved(nftId) == address(this), "Not approved"
         );
         nft.transferFrom(_msgSender(), address(this), nftId);
         stakedNFTs[_msgSender()].add(nftId);
@@ -50,11 +49,7 @@ contract LntPreDeposit is Ownable, Multicall, IERC721Receiver, ReentrancyGuard {
         return stakedNFTs[user].length();
     }
 
-    function deposited(
-        address user,
-        uint256 count,
-        uint256 skip
-    ) external view returns (uint256[] memory) {
+    function deposited(address user, uint256 count, uint256 skip) external view returns (uint256[] memory) {
         uint256[] memory res = new uint256[](count);
         for (uint256 i = 0; i < count; i++) {
             res[i] = stakedNFTs[user].at(i + skip);
@@ -62,19 +57,11 @@ contract LntPreDeposit is Ownable, Multicall, IERC721Receiver, ReentrancyGuard {
         return res;
     }
 
-    function callother(
-        address target,
-        bytes memory data
-    ) external onlyOwner returns (bool, bytes memory) {
+    function callother(address target, bytes memory data) external onlyOwner returns (bool, bytes memory) {
         return target.call(data);
     }
 
-    function onERC721Received(
-        address,
-        address,
-        uint256,
-        bytes calldata
-    ) external pure override returns (bytes4) {
+    function onERC721Received(address, address, uint256, bytes calldata) external pure override returns (bytes4) {
         return bytes4("lnt");
     }
 }

@@ -7,6 +7,7 @@ import {MockERC721} from "../src/MockERC721.sol";
 
 contract LntPreScript is Script {
     function setUp() public {}
+
     function run() public {
         vm.startBroadcast();
 

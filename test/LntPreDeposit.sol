@@ -46,6 +46,29 @@ contract LntPreDepositTest is Test, ERC721Holder {
         assertEq(lnt.totalDeposit(), 0, "totalDeposit error");
     }
 
+    function test_DepositUnsafe() public {
+        uint256[] memory nftIds = _range(3, 1);
+        for (uint256 i = 0; i < nftIds.length; i++) {
+            nft.mint(address(this), nftIds[i]);
+        }
+        nft.setApprovalForAll(address(lnt), true);
+        for (uint256 i = 0; i < nftIds.length; i++) {
+            lnt.depositUnsafe(nftIds[i]);
+        }
+        assertEq(Arrays.sort(lnt.deposited(address(this))), nftIds, "Deposited error");
+        assertEq(lnt.totalDeposit(), 3, "totalDeposit error");
+        lnt.withdrawUnsafe(1);
+        assertEq(Arrays.sort(lnt.deposited(address(this))), _range(2, 2), "Deposited error");
+        assertEq(lnt.totalDeposit(), 2, "totalDeposit error");
+        lnt.withdrawUnsafe(2);
+        assertEq(lnt.deposited(address(this)), _range(1, 3), "Deposit error");
+        assertEq(lnt.totalDeposit(), 1, "totalDeposit error");
+        lnt.withdrawUnsafe(3);
+        assertEq(lnt.deposited(address(this)), _range(0, 0), "Deposit error");
+        assertEq(lnt.totalDeposit(), 0, "totalDeposit error");
+    }
+
+
     function test_Multi() public {
         uint256[] memory nftIds = _range(3, 4);
         for (uint256 i = 0; i < nftIds.length; i++) {
@@ -66,4 +89,5 @@ contract LntPreDepositTest is Test, ERC721Holder {
         assertEq(lnt.deposited(address(this)), _range(0, 0), "Deposit error");
         assertEq(lnt.totalDeposit(), 0, "totalDeposit error");
     }
+
 }

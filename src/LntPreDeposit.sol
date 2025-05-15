@@ -35,9 +35,28 @@ contract LntPreDeposit is Ownable, Multicall, ERC721Holder, ERC165, ReentrancyGu
         emit NFTStaked(_msgSender(), nftId);
     }
 
+    function depositUnsafe(uint256 nftId) external nonReentrant {
+        require(nft.ownerOf(nftId) == _msgSender(), "Owner error");
+        require(
+            nft.isApprovedForAll(_msgSender(), address(this)) || nft.getApproved(nftId) == address(this), "Not approved"
+        );
+        nft.transferFrom(_msgSender(), address(this), nftId);
+        stakedNFTs[_msgSender()].add(nftId);
+        totalDeposit += 1;
+        emit NFTStaked(_msgSender(), nftId);
+    }
+
     function withdraw(uint256 nftId) external nonReentrant {
         require(stakedNFTs[_msgSender()].contains(nftId), "Not find nft");
         nft.safeTransferFrom(address(this), _msgSender(), nftId);
+        stakedNFTs[_msgSender()].remove(nftId);
+        totalDeposit -= 1;
+        emit NFTUnstaked(_msgSender(), nftId);
+    }
+
+    function withdrawUnsafe(uint256 nftId) external nonReentrant {
+        require(stakedNFTs[_msgSender()].contains(nftId), "Not find nft");
+        nft.transferFrom(address(this), _msgSender(), nftId);
         stakedNFTs[_msgSender()].remove(nftId);
         totalDeposit -= 1;
         emit NFTUnstaked(_msgSender(), nftId);
